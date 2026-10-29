@@ -1,0 +1,233 @@
+/*
+ * build.gradle - Gradle build configuration for the Library Management Application
+ *
+ * This file defines plugins, dependencies, tasks, and configurations for
+ * compiling, testing, packaging, and analyzing the project.
+ *
+ * Gradle Build Lifecycle:
+ * compileJava → processResources → classes → jar → assemble
+ *                                          → test → jacocoTestReport → check → build
+ */
+
+// ===== PLUGINS =====
+// Plugins add capabilities to the project
+plugins {
+    // 'java' plugin: Adds Java compilation, testing, and packaging support.
+    // Provides tasks like compileJava, test, jar, javadoc, etc.
+    id 'java'
+
+    // 'application' plugin: Adds the 'run' task to execute the main class directly.
+    // Also configures distribution packaging with start scripts.
+    id 'application'
+
+    // 'jacoco' plugin: Adds JaCoCo code coverage support.
+    // Provides jacocoTestReport and jacocoTestCoverageVerification tasks.
+    id 'jacoco'
+
+    // 'com.gradleup.shadow' plugin: Creates a fat/uber JAR that bundles all
+    // dependencies into a single runnable JAR file.
+    // This is the maintained fork of the original Shadow plugin.
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+// ===== PROJECT METADATA =====
+// Group and version used in JAR naming and Maven coordinates
+group = 'com.college.library'    // Maven-style group ID
+version = '1.0.0'               // Semantic versioning
+
+// ===== JAVA TOOLCHAIN =====
+// Defines the JDK version required to build this project.
+// Gradle can auto-download the specified JDK via the foojay resolver
+// configured in settings.gradle, ensuring consistent builds across machines.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)  // Target Java 17
+    }
+}
+
+// ===== REPOSITORIES =====
+// Where Gradle looks for dependencies
+repositories {
+    mavenCentral()  // The primary public Maven repository (https://repo.maven.apache.org)
+}
+
+// ===== DEPENDENCIES =====
+// Each scope controls when and where the dependency is available:
+//   - implementation:     Compile + runtime classpath (not exposed to consumers)
+//   - testImplementation: Only available during test compilation and execution
+//   - testRuntimeOnly:    Only on test runtime classpath (not for compilation)
+dependencies {
+    // SLF4J API: Simple Logging Facade — provides a logging abstraction.
+    // We code against this API so the logging backend can be swapped.
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+
+    // Logback Classic: The actual logging backend that implements SLF4J.
+    // Provides console and file appenders, configurable via logback.xml.
+    implementation 'ch.qos.logback:logback-classic:1.5.12'
+
+    // Apache Commons Lang3: Utility library for String operations, etc.
+    // Demonstrates third-party dependency management in Gradle.
+    // We use StringUtils.isBlank() for input validation in model classes.
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+
+    // JUnit 5 Jupiter API: The main testing framework API for writing tests.
+    // Provides @Test, @DisplayName, assertions, @ParameterizedTest, etc.
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
+
+    // JUnit 5 Jupiter Params: Support for parameterized tests.
+    // Provides @ParameterizedTest, @ValueSource, @CsvSource, etc.
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.3'
+
+    // Mockito Core: Mocking framework for creating test doubles.
+    // Allows us to mock repository interfaces in service tests.
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+
+    // JUnit 5 Jupiter Engine: The test engine that runs JUnit 5 tests.
+    // Needed at runtime but not at compile time for test classes.
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.3'
+}
+
+// ===== APPLICATION PLUGIN CONFIGURATION =====
+// The 'application' plugin needs to know the main class to run
+application {
+    // Fully qualified name of the class with the main() method
+    mainClass = 'com.college.library.Main'
+}
+
+// Configure the 'run' task to accept console input.
+// Without this, Scanner-based input won't work when using `./gradlew run`.
+tasks.named('run') {
+    standardInput = System.in
+}
+
+// ===== JAR MANIFEST =====
+// The manifest is metadata embedded in the JAR file.
+// Main-Class allows the JAR to be run with `java -jar`.
+tasks.named('jar') {
+    manifest {
+        attributes(
+            'Main-Class': 'com.college.library.Main',               // Entry point
+            'Implementation-Title': project.name,                    // Project name
+            'Implementation-Version': project.version                // Version string
+        )
+    }
+}
+
+// ===== SHADOW JAR CONFIGURATION =====
+// Produces a fat JAR with ALL dependencies bundled inside.
+// Output: build/libs/library-management-1.0.0-all.jar
+// This can be distributed and run without needing to install dependencies.
+tasks.named('shadowJar') {
+    // The '-all' classifier distinguishes it from the regular JAR
+    archiveClassifier.set('all')
+
+    // Merge META-INF/services files (needed for SLF4J service loading)
+    mergeServiceFiles()
+
+    manifest {
+        attributes(
+            'Main-Class': 'com.college.library.Main',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version
+        )
+    }
+}
+
+// ===== TEST CONFIGURATION =====
+// Configure how tests are discovered and reported
+tasks.named('test') {
+    // Use the JUnit Platform (JUnit 5) test engine
+    useJUnitPlatform()
+
+    // Show per-test results in the console output
+    testLogging {
+        events 'passed', 'skipped', 'failed'    // Which events to log
+        showExceptions true                       // Show exception details
+        showCauses true                           // Show exception causes
+        showStackTraces true                      // Show stack traces for failures
+        exceptionFormat 'full'                    // Full exception formatting
+    }
+
+    // After tests finish, automatically generate the JaCoCo coverage report
+    finalizedBy tasks.named('jacocoTestReport')
+}
+
+// ===== JACOCO CONFIGURATION =====
+// JaCoCo (Java Code Coverage) measures how much of the code is exercised by tests.
+
+// Configure the coverage report formats
+tasks.named('jacocoTestReport') {
+    // Depend on test execution — can't generate coverage without running tests
+    dependsOn tasks.named('test')
+
+    reports {
+        xml.required = true    // XML report for CI tools (e.g., Codecov, SonarQube)
+        html.required = true   // HTML report for human-readable browsing
+        // Reports are generated in build/reports/jacoco/test/
+    }
+}
+
+// Coverage verification: fail the build if coverage is below the threshold
+// We exclude the Main class (CLI/presentation layer) because the interactive
+// menu-driven console UI is inherently difficult to unit test and does not
+// represent business logic quality.
+tasks.named('jacocoTestCoverageVerification') {
+    // Filter out Main.class from the classes JaCoCo analyzes for verification
+    classDirectories.setFrom(
+        sourceSets.main.output.classesDirs.collect {
+            fileTree(dir: it, excludes: ['**/Main.class'])
+        }
+    )
+
+    violationRules {
+        rule {
+            limit {
+                // Use LINE counter for line coverage measurement
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                // Minimum 70% line coverage required
+                minimum = 0.70
+            }
+        }
+    }
+}
+
+// Wire coverage verification into the 'check' lifecycle task.
+// This means `./gradlew check` (and therefore `./gradlew build`) will fail
+// if coverage drops below 70%.
+tasks.named('check') {
+    dependsOn tasks.named('jacocoTestCoverageVerification')
+}
+
+// ===== JAVADOC CONFIGURATION =====
+// Configure Javadoc generation
+tasks.named('javadoc') {
+    options {
+        // Set the documentation title
+        windowTitle = 'Library Management System API'
+        docTitle = 'Library Management System API Documentation'
+        // Suppress warnings for missing Javadoc (we have it, but just in case)
+        addStringOption('Xdoclint:none', '-quiet')
+        // Set encoding for proper character handling
+        encoding = 'UTF-8'
+    }
+}
+
+// ===== CUSTOM TASK: printBuildInfo =====
+// A custom task that prints project metadata — useful for debugging builds
+tasks.register('printBuildInfo') {
+    group = 'help'
+    description = 'Prints project build information'
+
+    doLast {
+        println "=============================="
+        println " Build Information"
+        println "=============================="
+        println " Project Name   : ${project.name}"
+        println " Version        : ${project.version}"
+        println " Group          : ${project.group}"
+        println " Java Version   : ${java.toolchain.languageVersion.get()}"
+        println " Gradle Version : ${gradle.gradleVersion}"
+        println "=============================="
+    }
+}

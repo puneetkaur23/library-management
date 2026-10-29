@@ -1,0 +1,31 @@
+# Gradle build output
+build/
+
+# Gradle wrapper JAR and config (wrapper files ARE committed; this excludes caches)
+.gradle/
+
+# IDE files
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+*.code-workspace
+
+# Compiled classes
+*.class
+
+# Build output
+out/
+
+# Log files
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Distribution archives
+*.tar.gz
+*.zip
+

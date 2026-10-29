@@ -1,0 +1,26 @@
+/*
+ * settings.gradle - Gradle project settings
+ *
+ * This file is evaluated before build.gradle. It defines:
+ * - The root project name
+ * - Plugin management (where Gradle finds plugins)
+ * - Toolchain resolver (auto-downloads JDK if needed)
+ */
+
+// Plugin management: define where Gradle should look for plugins
+pluginManagement {
+    repositories {
+        gradlePluginPortal()  // Default Gradle plugin repository
+        mavenCentral()         // Fallback to Maven Central
+    }
+}
+
+// Apply the Foojay toolchain resolver plugin.
+// This allows Gradle to auto-download a JDK matching the toolchain spec
+// (e.g., Java 17) if one isn't found locally. Very useful for CI/CD.
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+// Root project name — used in JAR file naming and reports
+rootProject.name = 'library-management'

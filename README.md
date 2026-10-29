@@ -1,6 +1,6 @@
 # Library Management Application
 
-A menu-driven console application for managing books, members, and loans in a library, built with **Java 17** and automated using **Gradle**. This project demonstrates dependency management, build automation, unit testing, and code coverage as part of the **Practical DevOps** course (Activity 7).
+A modern DevOps-oriented academic library management system developed in **Java 17** featuring complete build pipeline automation via **Gradle**. This project demonstrates dependency management, build automation, unit testing, and code coverage as part of the **Practical DevOps** course (Activity 7).
 
 ## Features
 

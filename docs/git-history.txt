@@ -1,0 +1,32 @@
+﻿*   7214503 docs: resolve merge conflict between branch A and branch B in README
+|\  
+| * 332062c docs: improve intro summary on branch B
+* |   09d22d5 Merge branch 'conflict-branch-a'
+|\ \  
+| |/  
+|/|   
+| * 148dc2a docs: expand project description on branch A
+|/  
+* a6adbe5 docs: add initial documentation and reports
+*   5589757 Merge branch 'feature/tests'
+|\  
+| * d898b57 test: add 52 unit tests with parameterized and mockito suites
+|/  
+*   b153bf4 Merge branch 'feature/cli'
+|\  
+| * 6e73f5b feat: add CLI menu with interactive scanner loop
+|/  
+*   4e44761 Merge branch 'feature/service'
+|\  
+| * cd8ff7f feat: add LibraryService issue/return logic with clock injection
+|/  
+*   9198d88 Merge branch 'feature/repository'
+|\  
+| * 132035f feat: add repository layer (interfaces and in-memory stores)
+|/  
+*   33dcceb Merge branch 'feature/model'
+|\  
+| * 9a84412 feat: add model classes (Book, Member, Loan)
+|/  
+* 19969bc chore: make gradlew executable
+* 7bd845c chore: initialize Gradle project with wrapper and .gitignore

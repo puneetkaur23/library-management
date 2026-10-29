@@ -1,6 +1,7 @@
 # Library Management Application
 
-A robust enterprise-grade console application for managing library inventory and user circulation, engineered with **Java 17** and automated with **Gradle 8**. This project demonstrates dependency management, build automation, unit testing, and code coverage as part of the **Practical DevOps** course (Activity 7).
+A robust academic library management system engineered with **Java 17** featuring complete build automation, dependency management, unit testing, and packaging via **Gradle 8**. Developed for the **Practical DevOps** course (Activity 7).
+A robust academic library management system engineered with **Java 17** featuring complete build automation, dependency management, unit testing, and packaging via **Gradle 8**. Developed for the **Practical DevOps** course (Activity 7).
 
 ## Features
 

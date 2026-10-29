@@ -19,3 +19,4 @@
 2. **Build Configuration**: Explain `build.gradle`, dependency scopes (`implementation` vs `testImplementation`), and plugins.
 3. **Quality Assurance**: Walk through JUnit test cases, edge cases, and JaCoCo coverage rules.
 4. **DevOps & Packaging**: Explain how Shadow JAR bundles dependencies and how GitHub Actions automates CI.
+

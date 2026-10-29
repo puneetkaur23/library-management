@@ -15,3 +15,4 @@ Use this checklist to capture required screenshots for your academic submission,
 | **7** | **Git Commit Graph & History** | Run in terminal:<br>`git log --oneline --graph --all` | Tree graph displaying feature branches, conventional commits, and merge conflict resolution. |
 | **8** | **GitHub Actions CI Run** *(after push)* | GitHub Web UI:<br>`https://github.com/<YOUR_USER>/library-management/actions` | Green checkmark for workflow `Gradle Build & Test` with uploaded build artifacts. |
 | **9** | **Javadoc Documentation** | Open in browser:<br>`build/docs/javadoc/index.html` | Rendered Javadoc HTML pages with class listings, package documentation, and method summaries. |
+

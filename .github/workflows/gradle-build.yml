@@ -1,45 +1,83 @@
-# CI/CD Pipeline for Library Management Application
-# Runs on every push and pull request to ensure code quality.
-# Uses Gradle wrapper for reproducible builds.
 
+# ==========================================
+# CI/CD PIPELINE FOR LIBRARY MANAGEMENT APPLICATION
+# ==========================================
+
+# Name displayed in the GitHub Actions tab
 name: Gradle Build & Test
 
+# ==========================================
+# TRIGGERS
+# Defines when the workflow should execute
+# ==========================================
 on:
+  # Trigger workflow whenever code is pushed
   push:
-    branches: [ main, 'feature/**' ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main          # Run when code is pushed to main
+      - 'feature/**'  # Run when code is pushed to any feature branch
 
+  # Trigger workflow whenever a Pull Request is created or updated
+  pull_request:
+    branches:
+      - main          # Run when a PR targets the main branch
+
+# ==========================================
+# JOBS
+# Defines the tasks performed by the workflow
+# ==========================================
 jobs:
   build:
+
+    # Name of the job displayed on GitHub Actions
     name: Build, Test & Package
+
+    # Specifies the virtual machine where the job runs
+    # ubuntu-latest provides a Linux environment
     runs-on: ubuntu-latest
 
+    # ==========================================
+    # STEPS
+    # Commands executed sequentially in the job
+    # ==========================================
     steps:
-      # Step 1: Check out the source code
+
+      # STEP 1: CHECKOUT REPOSITORY
+      # Downloads the repository source code into the runner
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up JDK 17 (Eclipse Temurin distribution)
+      # STEP 2: SET UP JAVA
+      # Installs JDK 17 for compiling and running Java applications
+      # Temurin is the Eclipse Adoptium distribution of OpenJDK
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # Step 3: Set up Gradle with caching for faster builds
+      # STEP 3: SET UP GRADLE
+      # Configures Gradle and enables dependency/build caching
+      # This reduces build time in future workflow executions
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # Step 4: Make gradlew executable (important for Linux/macOS runners)
+      # STEP 4: MAKE GRADLE WRAPPER EXECUTABLE
+      # Gives execution permission to gradlew on Linux
+      # Required because Linux does not automatically execute the script
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      # Step 5: Run the full build (compile, test, coverage check, jar)
+      # STEP 5: BUILD AND TEST APPLICATION
+      # clean removes previous build files
+      # build compiles the code, runs tests and creates the JAR
       - name: Build with Gradle
         run: ./gradlew clean build
 
-      # Step 6: Upload test report as a build artifact
+      # STEP 6: UPLOAD TEST REPORT
+      # Uploads the HTML test report as a GitHub Actions artifact
+      # always() ensures the report upload is attempted even if
+      # the build or test step fails
       - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -47,7 +85,10 @@ jobs:
           name: test-report
           path: build/reports/tests/test/
 
-      # Step 7: Upload JaCoCo coverage report
+      # STEP 7: UPLOAD JACOCO COVERAGE REPORT
+      # JaCoCo measures how much of the application code
+      # is executed during testing
+      # Uploads the generated HTML coverage report
       - name: Upload JaCoCo Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,7 +96,10 @@ jobs:
           name: jacoco-report
           path: build/reports/jacoco/test/html/
 
-      # Step 8: Upload the fat JAR as a build artifact
+      # STEP 8: UPLOAD FAT JAR
+      # Uploads the packaged application JAR file
+      # success() ensures this step runs only if previous steps succeed
+      # The fat JAR contains the application and its dependencies
       - name: Upload Fat JAR
         if: success()
         uses: actions/upload-artifact@v4
@@ -63,3 +107,6 @@ jobs:
           name: library-management-jar
           path: build/libs/library-management-1.0.0-all.jar
 
+# ==========================================
+# END OF CI/CD PIPELINE
+# ==========================================

@@ -139,6 +139,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## Authors
 
-- **Puneet Kaur**
-- **Shirin Bobdey**
+- Puneet Kaur
+- Shirin Bobdey
 
